@@ -107,8 +107,8 @@ class Color:
 
         if type(other) is Color:
             _or = other._red / 256
-            _og = other._red / 256
-            _ob = other._red / 256
+            _og = other._green / 256
+            _ob = other._blue / 256
 
             r *= _or
             g *= _og
@@ -124,6 +124,14 @@ class Color:
         self.set(r, g, b)
 
         return self
+        
+    def enhance(self, rg=0.0, rb=0.0, gr=0.0, gb=0.0, br=0.0, bg=0.0):
+        norms = list(self.normalize())
+        norms[0] = norms[0] - rg * norms[1] - rb * norms[2]
+        norms[1] = norms[1] - gr * norms[0] - gb * norms[2]
+        norms[2] = norms[2] - br * norms[0] - bg * norms[1]
+        self.setNormalized(*norms)
+       
 
     def grayScale(self):
         gray = (self._red+self._green+self._blue) / 3
@@ -144,8 +152,23 @@ class Color:
         self._blue //= 2
         return self
 
+        
+    def normalize(self):
+        return self._red/255.0, self._green/255.0, self._blue/255.0
+        
+    def setNormalized(self, red, green, blue):
+        norms = [red, green, blue]
+        
+        for normID in range(len(norms)):
+            if   norms[normID] < 0: norms[normID] = 0
+            elif norms[normID] > 1: norms[normID] = 1
+            
+        self._red   = int(norms[0]*255)
+        self._green = int(norms[1]*255)
+        self._blue  = int(norms[2]*255)
+
     def toHSV(self):
-        r, g, b = self._red / 255.0, self._green / 255.0, self._blue / 255.0
+        r, g, b = self.normalize()
         mx = max(r, g, b)
         mn = min(r, g, b)
         df = mx - mn
