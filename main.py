@@ -1,4 +1,4 @@
-from LedsInterface import Interface, singleColor_module, fromFile_module, hsvrgb_module
+from LedsInterface import Interface, singleColor_module, fromFile_module, hsvrgb_module,shades_module
 
 if __name__ == '__main__':
     i = Interface()
@@ -6,5 +6,6 @@ if __name__ == '__main__':
     i.registerModule("Single color", singleColor_module)
     i.registerModule("From file"   ,    fromFile_module)
     i.registerModule("HSV-RGB"     ,      hsvrgb_module)
+    i.registerModule("Shades"     ,       shades_module)
     
     i.mainloop()
