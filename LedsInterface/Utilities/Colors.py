@@ -1,6 +1,23 @@
 from math import floor
 from random import randint
 
+def Opposite(c, angle=180):
+    hue, sat, val = c.toHSV()
+    hue = (hue + angle) % 360
+    return Color.fromHSV(hue, sat, val)
+
+def Triplet(c, angle=120):
+    hue, sat, val = c.toHSV()
+    hue2 = (hue + angle) % 360
+    hue3 = (hue - angle) % 360
+    return Color.fromHSV(hue2, sat, val), Color.fromHSV(hue3, sat, val)
+
+def Quadruplet(c, angle=90):
+    hue, sat, val = c.toHSV()
+    hue2 = (hue + angle) % 360
+    hue3 = (hue + 180) % 360
+    hue4 = (hue - angle) % 360
+    return Color.fromHSV(hue2, sat, val), Color.fromHSV(hue3, sat, val), Color.fromHSV(hue4, sat, val),
 
 class Color:
     def __init__(self, red=0, gre=0, blu=0):
@@ -225,3 +242,11 @@ class Colors:
     yellow = Color(255, 0, 255)
     cyan = Color(0, 255, 255)
     magenta = Color(255, 255, 0)
+
+
+if __name__ == '__main__':
+    C = Color.fromHSV(120, 1, 1)
+    print(C)
+    print(Opposite(C))
+    print(Triplet(C, 70))
+    print(Quadruplet(C))
