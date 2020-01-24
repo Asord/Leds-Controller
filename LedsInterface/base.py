@@ -4,6 +4,8 @@ from tkinter.ttk import Notebook
 
 from LedsInterface.Utilities.ArduinoController import ArduinoController
 
+from LedsInterface.Utilities.Colors import Color
+
 class baseModule:
     def __init__(self, parent):
         self._parent = parent
@@ -28,6 +30,20 @@ class baseModule:
             Radiobutton(parent, text=offText, value="off", **defaultVars),
             Radiobutton(parent, text=onText, value="on", **defaultVars)
         ]
+
+    @staticmethod
+    def __linearInterpolator(a, b, t):
+        return (1 - t) * a + t * b
+
+    def interpolate(self, startColor, endColor, ratio):
+        startHSV = startColor.toHSV()
+        endHSV   = endColor.toHSV()
+
+        return Color.fromHSV(
+            self.__linearInterpolator(max(startHSV[0], endHSV[0]), min(startHSV[0], endHSV[0]), ratio),
+            self.__linearInterpolator(startHSV[1], endHSV[1], ratio),
+            self.__linearInterpolator(startHSV[2], endHSV[2], ratio))
+
 
     def update(self):
         raise NotImplementedError("Update must be implemented on derived classes")
@@ -56,7 +72,7 @@ class baseInterface(Tk):
         self.__update()
 
     def setSpeed(self, speed):
-        if 10 <= speed <= 500:
+        if 5 <= speed <= 500:
             self._updateSpeed = speed
         else:
             self._updateSpeed = self.__defaultSpeed
