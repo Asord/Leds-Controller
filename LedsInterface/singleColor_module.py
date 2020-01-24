@@ -117,7 +117,7 @@ class singleColor_module(baseModule):
 
         """ Computer color coefs """
         if self._SV_coefEnabled.get() == "on":
-            _rgbList = _Color_RGB.mul([1.0, 0.42, 0.3]).toList()
+            _rgbList = _Color_RGB.enhance(gr=0.60, br=0.45, bg=0.25).toList()
         else:
             _rgbList = _Color_RGB.toList()
 
