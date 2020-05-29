@@ -41,6 +41,9 @@ class ArduinoController:
 
         return portName
 
+    def isConnected(self):
+        return self._isConnected
+
     def _connect(self):
         portName = self.__findController()
         if portName == "":
