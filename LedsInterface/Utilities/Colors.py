@@ -148,6 +148,8 @@ class Color:
         norms[1] = norms[1] - gr * norms[0] - gb * norms[2]
         norms[2] = norms[2] - br * norms[0] - bg * norms[1]
         self.setNormalized(*norms)
+        
+        return self
        
 
     def grayScale(self):
