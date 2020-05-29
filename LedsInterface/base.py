@@ -9,6 +9,7 @@ from LedsInterface.Utilities.Colors import Color
 class baseModule:
     def __init__(self, parent):
         self._parent = parent
+        self.title = "Leds Controller"
 
         self._controller = None
 
