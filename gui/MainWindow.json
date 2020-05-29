@@ -1,0 +1,7 @@
+{
+  "Frame": {
+    "name": "frame_main",
+    "row": 0, "column": 0, "sticky": "nesw", "weight": 1,
+    "background": "#101010", "relief": "flat"
+  }
+}

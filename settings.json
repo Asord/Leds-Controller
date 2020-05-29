@@ -1,0 +1,7 @@
+{
+  "alpha": 0.8,
+  "notitle": true,
+  "geometry": "600*800",
+  "background": "#101010",
+  "numberOfLeds": 21
+}
