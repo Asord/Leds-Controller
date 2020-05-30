@@ -102,7 +102,7 @@ class Color:
     @classmethod
     def copy(cls, col):
         r, g, b = col.toTuple()
-        cls(r, g, b)
+        return cls(r, g, b)
 
     def __add__(self, other):
         if type(other) is Color:
@@ -132,6 +132,9 @@ class Color:
             b *= _ob
 
         return Color(r % 256, g % 256, b % 256)
+
+    def toTuple(self):
+        return self._red, self._green, self._blue
 
     def mul(self, other):
         r = self._red * other[0]
