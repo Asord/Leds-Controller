@@ -28,13 +28,17 @@ class MainWindow(XboxTkWindow):
         self.controller.nbLeds = self.settings["numberOfLeds"]
         self.controller.clear()
 
+        self.currentEffect = 0 # 0: Color 1: Rainbow 2: snake
 
         self.isColorChooserEnabled = False
         self.isValueChooserEnabled = False
 
-        self.color = Color()
+        self.color = Color(255, 0, 0)
         self.__colorHSV = [0.0, 1.0, 1.0]
-        self.colorFrame = self.widgets["frame_main"]
+        self.colorFrame = self.widgets["frame_up"]
+        self.previewFrame = self.widgets["frame_down"]
+
+        self.modificatorSpeed = 1.0
 
         self.__leftJoy  = JoyTable(self.leftJoystick)
         self.__rightJoy = JoyTable(self.rightJoystick)
@@ -50,22 +54,77 @@ class MainWindow(XboxTkWindow):
         self.joybind(JOY_LEFT_TRIGER, self.leftTrigger)
         self.joybind(JOY_RIGHT_TRIGER, self.rightTrigger)
 
+        self.xbind(JOY_LB, lambda: self.switchEffect(-1))
+        self.xbind(JOY_RB, lambda: self.switchEffect( 1))
+
+        self.xbind(JOY_DOWN, lambda: self.changeModificatorSpeed(-1))
+        self.xbind(JOY_UP  , lambda: self.changeModificatorSpeed( 1))
+        self.xbind(JOY_B   , self._handleClose)
+
         self.protocol("WM_DELETE_WINDOW", self._handleClose)
 
         self._StartXHandler()
 
+        self.updateColor()
+
+    def changeModificatorSpeed(self, modificator):
+        if modificator == -1:
+            if self.modificatorSpeed > 0.09:
+                self.modificatorSpeed -= 0.1
+        elif modificator == 1:
+            if self.modificatorSpeed < 5.0:
+                self.modificatorSpeed += 0.1
+
+    def switchEffect(self, direction):
+        self.color = Color(255, 0, 0)
+        self.__colorHSV = [0.0, 1.0, 1.0]
+
+        if direction == -1:
+            if self.currentEffect == 0:
+                self.currentEffect = 2
+            else:
+                self.currentEffect -= 1
+        elif direction == 1:
+            if self.currentEffect == 2:
+                self.currentEffect = 0
+            else:
+                self.currentEffect += 1
+
+    def __sendSingleColorToAll(self, color):
+        colorToSend = Color.copy(color).enhance(gr=0.60, br=0.45, bg=0.25)
+        colorToSendList = colorToSend.toList()
+        for n in range(self.controller.nbLeds):
+            self.controller.buffer[n] = colorToSendList
+
+        self.previewFrame.configure(bg=colorToSend.toHex())
+
     def updateColor(self):
         if self.controller.isConnected():
-            self.color.enhance(gr=0.60, br=0.45, bg=0.25)
+            if self.currentEffect == 0:
+                self.__sendSingleColorToAll(self.color)
 
-            for n in range(self.controller.nbLeds):
-                self.controller.buffer[n] = self.color.toList()
+            elif self.currentEffect == 1:
+
+                h, s, v = self.__colorHSV
+                for n in range(self.controller.nbLeds):
+                    self.controller.buffer[n] = Color().fromHSV(h, s, v).enhance(gr=0.60, br=0.45, bg=0.25).toList()
+                    h -= self.modificatorSpeed
+
+                self.__colorHSV[0] += self.modificatorSpeed
+                self.color = Color.fromHSV(*self.__colorHSV)
+                self.previewFrame.configure(bg=self.color.toHex())
+
+            elif self.currentEffect == 2:
+                self.__sendSingleColorToAll(self.color)
+                self.__colorHSV[0] += self.modificatorSpeed
+                self.color = Color.fromHSV(*self.__colorHSV)
+
             self.controller.send()
 
         self.after(100, self.updateColor)
 
     def rightJoystick(self, joyTable):
-        if self.isColorChooserEnabled:
+        if self.currentEffect == 0 and self.isColorChooserEnabled:
 
             rad = atan2(joyTable.y, joyTable.x)
             deg = 90-degrees(rad)
@@ -78,7 +137,7 @@ class MainWindow(XboxTkWindow):
             self.colorFrame.configure(bg=self.color.toHex())
 
     def leftJoystick(self, joyTable):
-        if self.isColorChooserEnabled:
+        if self.currentEffect == 0 and self.isColorChooserEnabled:
 
             rad = atan2(joyTable.y, joyTable.x)
             deg = 90-degrees(rad)
@@ -96,21 +155,21 @@ class MainWindow(XboxTkWindow):
 
 
     def leftTrigger(self, value):
-        if value > 0.1:
+        if  self.currentEffect == 0 and value > 0.1:
             self.isValueChooserEnabled = True
         else:
             self.isValueChooserEnabled = False
 
     def rightTrigger(self, value):
-        if value > 0.1:
+        if self.currentEffect == 0 and value > 0.1:
             self.isColorChooserEnabled = True
         else:
             self.isColorChooserEnabled = False
 
     def _handleClose(self):
-        self._controller.clear()
-        self._controller.send()
-        self._controller.destroy()
+        self.controller.clear()
+        self.controller.send()
+        self.controller.destroy()
         self.destroy()
 
 if __name__ == '__main__':
