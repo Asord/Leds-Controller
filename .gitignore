@@ -126,3 +126,4 @@ dmypy.json
 .idea/
 .log
 /Resources/templates/*.btp
+AsemcoAPI/
